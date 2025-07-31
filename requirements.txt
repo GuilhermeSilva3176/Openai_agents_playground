@@ -1,3 +1,4 @@
-starlite
 openai-agents
 python-dotenv
+websockets
+fastapi
