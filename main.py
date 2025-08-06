@@ -1,25 +1,27 @@
-from fastapi import FastAPI
-from openai_agents.main_agent import session_end, handle_message
-from dotenv import load_dotenv
-from pydantic import BaseModel
+from agent_handler import exit_session, send_audio
+from elevenlabs_handler import text_to_speech
+from audio_record import gravar_pcm24
 import asyncio
-load_dotenv()
+from dotenv import load_dotenv
 
+load_dotenv()
 
 async def main():
     try:
         while True:
-            message = input("User: ")
-            result = await handle_message(message.encode('utf-8'))
+            pcm_data = gravar_pcm24(record_seconds=5)
+            print(f"Enviando {len(pcm_data)} bytes de PCM cru")
+            openai_response = await send_audio(pcm_data)
 
-            print(f"bot: {result}")
-            
-            if message.lower() == "exit":
-                break
+            if openai_response:
+                print(f"Resposta do OpenAI: {openai_response}")
+                await text_to_speech(openai_response)
+
+    except KeyboardInterrupt:
+        print("Sessão encerrada pelo usuário.")
+        await exit_session()    
+    
     except Exception as e:
-        print(f"Error starting session: {e}")
-    finally:
-        await session_end()
-        print("Session ended successfully")
-        
+        print(f"Erro: {e}")
+                  
 asyncio.run(main())

@@ -2,3 +2,6 @@ openai-agents
 python-dotenv
 websockets
 fastapi
+elevenlabs
+pyaudio
+uvicorn
