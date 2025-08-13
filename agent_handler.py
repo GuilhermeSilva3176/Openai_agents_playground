@@ -37,19 +37,27 @@ async def exit_session():
     
     return False
 
-async def send_audio(audio_data):
+async def send_audio_to_openai(audio_data, is_last):
     global session
     if not session:
         await enter_session()
 
     if session:
-        await session.send_audio(audio_data)
+        if is_last:
+            await session.send_audio(audio_data, commit=True)
             
-        async for event in session:
-            if event.type == "raw_model_event":
-                if hasattr(event.data, "item") and hasattr(event.data.item, "role") and event.data.item.role == "assistant":
-                    if event.data.item.content:
-                        for content in event.data.item.content:
-                            return content.text
+            async for event in session:
+                print(event)
+        
+        if not is_last:
+            await session.send_audio(audio_data)
+                
+            # async for event in session:
+            #     print(event)
+                # if event.type == "raw_model_event":
+                #     if hasattr(event.data, "item") and hasattr(event.data.item, "role") and event.data.item.role == "assistant":
+                #         if event.data.item.content:
+                #             for content in event.data.item.content:
+                #                 return content.text
 
     return False
